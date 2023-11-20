@@ -28,15 +28,40 @@ async function run() {
 
     const menuCollection = client.db("bistroyBossDB").collection("menu");
     const reviewCollection = client.db("bistroyBossDB").collection("reviews");
+    const cartsCollection = client.db("bistroyBossDB").collection("carts");
+    // const userCollection = client.db("bistroyBossDB").collection("users");
 
-    app.get('/menu', async(req, res)=>{
-        const result = await menuCollection.find().toArray();
-        res.send(result)
+    // -------------------
+    // Menu Collection
+    // -------------------
+
+    app.get('/menu', async (req, res) => {
+      const result = await menuCollection.find().toArray();
+      res.send(result)
     })
 
-    app.get('/reviews', async(req, res)=>{
-        const result = await reviewCollection.find().toArray();
-        res.send(result)
+    // -------------------
+    // Reviews Collection
+    // -------------------
+
+    app.get('/reviews', async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result)
+    })
+
+    // -------------------
+    // Carts Collection 
+    // -------------------
+    app.get('/carts', async (req, res) => {
+      const email = req.query.email;
+      const query = { userEmail: email };
+      const result = await cartsCollection.find(query).toArray()
+      res.send(result);
+    })
+    app.post('/carts', async (req, res) => {
+      const cartsitems = req.body;
+      const result = await cartsCollection.insertOne(cartsitems);
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
