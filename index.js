@@ -26,10 +26,26 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const userCollection = client.db("bistroyBossDB").collection("users");
     const menuCollection = client.db("bistroyBossDB").collection("menu");
     const reviewCollection = client.db("bistroyBossDB").collection("reviews");
     const cartsCollection = client.db("bistroyBossDB").collection("carts");
-    // const userCollection = client.db("bistroyBossDB").collection("users");
+
+
+    // -------------------
+    // User Collection
+    // -------------------
+
+    app.post('/users', async(req, res)=>{
+      const user = req.body;
+      const query = {email: user.email};
+      const exitsuser= await userCollection.findOne(query);
+      if(exitsuser){
+        return res.send({message: 'user already exists', insertedId: null})
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
 
     // -------------------
     // Menu Collection
@@ -64,9 +80,9 @@ async function run() {
       res.send(result);
     })
 
-    app.delete('/carts/:id', async(req,res)=>{
+    app.delete('/carts/:id', async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await cartsCollection.deleteOne(query);
       res.send(result);
     })
