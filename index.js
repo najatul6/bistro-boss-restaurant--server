@@ -32,39 +32,58 @@ async function run() {
     const reviewCollection = client.db("bistroyBossDB").collection("reviews");
     const cartsCollection = client.db("bistroyBossDB").collection("carts");
 
+    // -------------------
+    // Jwt Token Collection 
+    // -------------------
+
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '24h' });
+      res.send({token});
+    })
+
+    // Token Verify 
+    const verifyToken = (req,res,next)=>{
+      if(!req.header.authorization){
+        return res.status(401).send({message:'forbidden access'});
+
+      }
+      const token = req.header.authorization.split(' ')[1];
+      // next();
+    }
 
     // -------------------
     // User Collection
     // -------------------
 
-    app.get('/users', async(req,res)=>{
+    app.get('/users',verifyToken, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     })
 
-    app.post('/users', async(req, res)=>{
+    app.post('/users', async (req, res) => {
       const user = req.body;
-      const query = {email: user.email};
-      const exitsuser= await userCollection.findOne(query);
-      if(exitsuser){
-        return res.send({message: 'user already exists', insertedId: null})
+      const query = { email: user.email };
+      const exitsuser = await userCollection.findOne(query);
+      if (exitsuser) {
+        return res.send({ message: 'user already exists', insertedId: null })
       }
       const result = await userCollection.insertOne(user);
       res.send(result);
     })
 
-    app.patch('/users/admin/:id',async(req, res)=>{
+    app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
-      const updatedDoc={
-        $set:{
-          role:'admin'
+      const updatedDoc = {
+        $set: {
+          role: 'admin'
         }
       }
-      const result = await userCollection.updateOne(filter,updatedDoc);
+      const result = await userCollection.updateOne(filter, updatedDoc);
       res.send(result);
     })
-    
+
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
