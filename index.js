@@ -39,24 +39,30 @@ async function run() {
     app.post('/jwt', async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '24h' });
-      res.send({token});
+      res.send({ token });
     })
 
     // Token Verify 
-    const verifyToken = (req,res,next)=>{
-      if(!req.header.authorization){
-        return res.status(401).send({message:'forbidden access'});
-
+    const verifyToken = (req, res, next) => {
+      console.log('mytoken',req.headers)
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: 'forbidden access' });
       }
-      const token = req.header.authorization.split(' ')[1];
-      // next();
+      const token = req.headers.authorization.split(' ')[1];
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: 'forbidden access' });
+        }
+        req.decoded = decoded;
+        next();
+      })
     }
 
     // -------------------
     // User Collection
     // -------------------
 
-    app.get('/users',verifyToken, async (req, res) => {
+    app.get('/users', verifyToken, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     })
