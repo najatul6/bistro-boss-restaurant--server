@@ -38,7 +38,7 @@ async function run() {
 
     app.post('/jwt', async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
       res.send({ token });
     })
 
@@ -47,7 +47,6 @@ async function run() {
     // -------------------
 
     const verifyToken = (req, res, next) => {
-      console.log('mytoken', req.headers)
       if (!req.headers.authorization) {
         return res.status(401).send({ message: 'unauthorized access' });
       }
@@ -135,6 +134,12 @@ async function run() {
     app.get('/menu', async (req, res) => {
       const result = await menuCollection.find().toArray();
       res.send(result)
+    })
+
+    app.post('/menu',verifyToken,verifyAdmin, async(req,res)=>{
+      const item = req.body;
+      const result = await menuCollection.insertOne(item);
+      res.send(result);
     })
 
     // -------------------
