@@ -5,6 +5,15 @@ const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+  username: 'api',
+  key: process.env.MAIL_PRIVATE_KEY,
+});
+
+
 const port = process.env.PORT || 5000;
 
 // middleware 
@@ -26,7 +35,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const userCollection = client.db("bistroyBossDB").collection("users");
     const menuCollection = client.db("bistroyBossDB").collection("menu");
@@ -208,7 +217,7 @@ async function run() {
     })
 
     // -------------------
-    // Payment Collection
+    // Payment intence
     // -------------------
     app.post('/create-payment-intent', async (req, res) => {
       const { price } = req.body;
@@ -235,6 +244,24 @@ async function run() {
         }
       }
       const deleteResult = await cartsCollection.deleteMany(query)
+
+      // Send user Email payment confirmation
+      mg.messages
+        .create(process.env.MAIL_SENDING_DOMAIN, {
+          from: "Mailgun Sandbox <postmaster@sandbox073899380be242c7b2d3766038f99cd3.mailgun.org>",
+          to: ["najatulislam37@gmail.com"],
+          subject: "Hello",
+          text: "Testing some Mailgun awesomness!",
+          html: `<div>
+              <h2>Thanks for your order</h2>
+              <h4>Your Transaction Id : <strong>${payment.paymentId}</strong></h4>
+              <p>We are waiting for your good feedback</p>
+          </div>`
+        })
+        .then(msg => console.log(msg))
+        .catch(err => console.log(err));
+
+
       res.send({ paymentResult, deleteResult })
     })
 
@@ -311,8 +338,8 @@ async function run() {
     })
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
