@@ -37,11 +37,11 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     const collectionConnect=client.db("bistroyBossDB")
-    const userCollection = client.db("bistroyBossDB").collection("users");
-    const menuCollection = client.db("bistroyBossDB").collection("menu");
-    const reviewCollection = client.db("bistroyBossDB").collection("reviews");
-    const cartsCollection = client.db("bistroyBossDB").collection("carts");
-    const paymentCollection = client.db("bistroyBossDB").collection("payments");
+    const userCollection = collectionConnect.collection("users");
+    const menuCollection = collectionConnect.collection("menu");
+    const reviewCollection = collectionConnect.collection("reviews");
+    const cartsCollection = collectionConnect.collection("carts");
+    const paymentCollection = collectionConnect.collection("payments");
 
     // -------------------
     // Jwt Token Collection 
