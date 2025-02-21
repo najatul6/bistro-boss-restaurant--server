@@ -36,7 +36,7 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
-
+    const collectionConnect=client.db("bistroyBossDB")
     const userCollection = client.db("bistroyBossDB").collection("users");
     const menuCollection = client.db("bistroyBossDB").collection("menu");
     const reviewCollection = client.db("bistroyBossDB").collection("reviews");
